@@ -34,7 +34,9 @@
     "pdfkit": "^0.11.0",
     "serve": "^11.3.2",
     "stream": "0.0.2",
-    "uniqid": "^5.2.0"
+    "uniqid": "^5.2.0",
+    "query-to-mongo": "^0.10.1",
+    "validator": "^13.5.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
