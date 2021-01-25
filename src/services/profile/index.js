@@ -3,6 +3,7 @@ const profileSchema = require("./profileSchema");
 const PDFDocument = require("pdfkit");
 const blobStream  = require('blob-stream');
 const { createWriteStream } = require("fs-extra")
+const fs = require('fs');
 
 router.get("/", async (req, res, next) => {
   try {
@@ -21,25 +22,31 @@ router.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-// router.get("/:id/cv", async (req, res, next) => {
+router.get("/:id/cv", async (req, res, next) => {
     
     
-//   try {
-//     const profile = await profileSchema.findById(req.params.id);
-//     const doc = new PDFDocument();
-//     doc.pipe(res)
-//     let stream = doc.pipe(blobStream());
-//     doc.pipe(await createWriteStream("output.pdf"));
-//     doc.text(`Name: ${profile.name}`, 100, 100);
-//     doc.end();
-//     stream.on('finish', function() {
-//         iframe.src = stream.toBlob('application/pdf');
-//       });
-//     res.send("PDF created")
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+  try {
+    const profile = await profileSchema.findById(req.params.id);
+    let doc = new PDFDocument();
+    doc.pipe(res);
+    
+    doc.text(`
+    Name: ${profile.name},
+    Surname: ${profile.surname}, 
+    email: ${profile.email},
+    biography: ${profile.bio} primarily in ${profile.area},
+    title: ${profile.title},
+    Experience: ${"Here will be the experience"}
+     `, 100, 100);
+    doc.end();
+    await res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+      });
+      res.status(201).send("OK")
+  } catch (error) {
+    next(error);
+  }
+});
 /* 
 {
         "_id": "5d84937322b7b54d848eb41b", //server generated
