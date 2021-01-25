@@ -4,9 +4,9 @@ Collaborators: [Yazid](https://github.com/Imaginationzz), [Ademuyiwa](https://gi
 
 
 ### Basic Features: 
-- CRUD for profiles, experiences and posts
+- CRUD for ~profiles~, experiences and posts
 - Add and edit propic, post images and exp images 
-- Generate a PDF CV 
+- ~Generate a PDF CV~
 - Post (and profile search ) pagination
 - Generate a CSV file for experiences
 
@@ -18,3 +18,5 @@ BE: (still to be implemented)
 ### Daily Log: 
 #### 25/01/21: 
 Created Notion page for organization and divided tasks
+##### User route: 
+Added CRUD and PDF creation
