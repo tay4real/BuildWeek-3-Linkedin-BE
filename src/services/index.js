@@ -1,11 +1,26 @@
-const router = require('express').Router()
+const router = require("express").Router();
 
-const profileRouter = require('./profile')
-const postRouter = require('./post')
-const expRouter = require('./experience')
+const profileRouter = require("./profile");
+const postRouter = require("./post");
+const expRouter = require("./experience");
 
-router.use('/profile', profileRouter)
-router.use('/post', postRouter)
-router.use('/experience', expRouter)
+const {
+  notFoundHandler,
+  unauthorizedHandler,
+  forbiddenHandler,
+  badRequestHandler,
+  catchAllHandler,
+} = require("../errorHandlers");
 
-module.exports = router
+router.use("/profile", profileRouter);
+router.use("/post", postRouter);
+router.use("/experience", expRouter);
+
+// ERROR HANDLERS
+router.use(notFoundHandler);
+router.use(unauthorizedHandler);
+router.use(forbiddenHandler);
+router.use(badRequestHandler);
+router.use(catchAllHandler);
+
+module.exports = router;
