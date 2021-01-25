@@ -2,8 +2,8 @@
 
 Collaborators: [Yazid](https://github.com/Imaginationzz), [Ademuyiwa](https://github.com/tay4real), [Lidia](https://github.com/LidiaKovac)
 
-Features: 
-### Profile route
+
+### Basic Features: 
 - CRUD for profiles, experiences and posts
 - Add and edit propic, post images and exp images 
 - Generate a PDF CV 
