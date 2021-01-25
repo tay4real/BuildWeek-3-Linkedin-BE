@@ -8,7 +8,7 @@ router.get("/", async (req, res, next) => {
     const query = q2m(req.query);
     const total = await PostModel.countDocuments(query.criteria);
 
-    const posts = await PostModel.find(query.criteria, query.options.fields)
+    const posts = await PostModel.find(query.criteria)
       .sort(query.options.sort)
       .skip(query.options.skip)
       .limit(query.options.limit)

@@ -8,7 +8,7 @@ const PostSchema = new Schema(
       required: true,
     },
     username: String,
-    user: [{ type: Schema.Types.ObjectId, ref: "Profile" }],
+    user: [{ type: Schema.Types.ObjectId, ref: "profile" }],
   },
   {
     timestamps: true,
@@ -19,5 +19,5 @@ PostSchema.static("findPostWithProfile", async function (id) {
   const post = await PostModel.findById(id).populate("profiles");
   return post;
 });
-const PostModel = model("Post", PostSchema);
+const PostModel = mongoose.model("Post", PostSchema);
 module.exports = PostModel;
