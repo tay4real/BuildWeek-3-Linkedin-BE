@@ -4,14 +4,16 @@
   "description": "Collaborators: [Yazid](https://github.com/Imaginationzz), [Ademuyiwa](https://github.com/tay4real), [Lidia](https://github.com/LidiaKovac)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon -r dotenv/config ./src/server.js",
+    "dev": "nodemon -r dotenv/config ./src/server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LidiaKovac/BuildWeek-3-Linkedin-BE.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lidia, Yazid and Ademuyiwa",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/LidiaKovac/BuildWeek-3-Linkedin-BE/issues"
@@ -24,6 +26,7 @@
     "express-list-endpoints": "^5.0.0",
     "fs": "0.0.1-security",
     "fs-extra": "^9.1.0",
+    "mongoose": "^5.11.13",
     "multer": "^1.4.2",
     "multer-storage-cloudinary": "^4.0.0",
     "path": "^0.12.7",
