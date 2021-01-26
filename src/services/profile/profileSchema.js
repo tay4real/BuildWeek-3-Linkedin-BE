@@ -9,7 +9,8 @@ const profileSchema = new Schema(
         "bio": String,
         "title": String,
         "area": String,
-        "username": String
+        "username": String,
+        "image": String
     },
   { timestamps: true }
 )
