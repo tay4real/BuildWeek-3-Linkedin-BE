@@ -1,27 +1,20 @@
 const router = require("express").Router();
 const profileSchema = require("./profileSchema");
-const PDFDocument = require("pdfkit");
-const blobStream = require("blob-stream");
-const { createWriteStream } = require("fs-extra");
 const fs = require("fs");
-const multer = require("multer");
+const PDFDocument = require("pdfkit");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("./cloudinary_setup");
 const { findOneAndUpdate } = require("./profileSchema");
+const multer = require("multer");
+
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "propics"
   },
 });
-/* var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '/tmp/my-uploads')
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
-  }
-})*/
+
 const cloudinaryMulter = multer({ storage: storage });
 
 router.get("/", async (req, res, next) => {
@@ -46,7 +39,6 @@ router.get("/:id/cv", async (req, res, next) => {
     const profile = await profileSchema.findById(req.params.id);
     let doc = new PDFDocument();
     doc.pipe(res);
-
     doc.text(
       `
     Name: ${profile.name},
