@@ -111,17 +111,10 @@ router.post(
 
 router.get("/:username/allpost", async (req, res, next) => {
   try {
-    const user = ProfileModel.find({ username: req.params.username });
-
-    console.log(user);
-    // const { post } = await PostModel.find({ profiles: id }).populate(
-    //   "profiles"
-    // );
-
-    res.send(user);
+    const post = await PostModel.find({ username: req.params.username });
+    res.send(post);
   } catch (error) {
-    console.log(error);
-    next(error);
+    next("While reading posts list a problem occurred!");
   }
 });
 
