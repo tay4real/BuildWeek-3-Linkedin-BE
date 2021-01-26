@@ -7,8 +7,15 @@ const PostSchema = new Schema(
       type: String,
       required: true,
     },
+    postimageUrl: String,
     username: String,
-    user: [{ type: Schema.Types.ObjectId, ref: "profile" }],
+    profiles: [{ type: Schema.Types.ObjectId, ref: "profile" }],
+    comments: [
+      {
+        text: String,
+        profiles: [{ type: Schema.Types.ObjectId, ref: "profile" }],
+      },
+    ],
   },
   {
     timestamps: true,
