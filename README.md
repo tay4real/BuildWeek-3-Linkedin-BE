@@ -18,5 +18,6 @@ BE: (still to be implemented)
 ### Daily Log: 
 #### 25/01/21: 
 Created Notion page for organization and divided tasks
-##### User route: 
-Added CRUD and PDF creation
+- Added CRUD and PDF creation for user
+###26/01/21: 
+
