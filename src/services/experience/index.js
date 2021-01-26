@@ -7,7 +7,7 @@ const { Transform } = require("json2csv");
 const { pipeline } = require("stream");
 const router = require("express").Router();
 
-router.get("/profile/:userName/experiences", async (req, res, next) => {
+router.get("experience/:userName", async (req, res, next) => {
   try {
     const exp = await experienceModel.findOne({
       userName: req.params.userName,
@@ -19,7 +19,7 @@ router.get("/profile/:userName/experiences", async (req, res, next) => {
   }
 });
 
-router.post("/profile/:userName/experiences", async (req, res, next) => {
+router.post("/:userName", async (req, res, next) => {
   try {
     const newExp = new experienceModel(req.body);
 
@@ -36,7 +36,7 @@ router.post("/profile/:userName/experiences", async (req, res, next) => {
   }
 });
 
-router.get("/profile/:userName/experiences/:expId", async (req, res, next) => {
+router.get("/:userName/experience/:expId", async (req, res, next) => {
   try {
     const experience = await experienceModel.find({
       $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
@@ -48,7 +48,7 @@ router.get("/profile/:userName/experiences/:expId", async (req, res, next) => {
   }
 });
 
-router.put("/profile/:userName/experiences/:expId", async (req, res, next) => {
+router.put("/:userName/experience/:expId", async (req, res, next) => {
   try {
     const modifiedExp = await experienceModel.findOneAndUpdate(
       {
@@ -70,25 +70,22 @@ router.put("/profile/:userName/experiences/:expId", async (req, res, next) => {
     next(error);
   }
 });
-router.delete(
-  "/profile/:userName/experiences/:expId",
-  async (req, res, next) => {
-    try {
-      const exp = await experienceModel.findOneAndDelete({
-        $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
-      });
-      if (exp) {
-        res.send(exp);
-      } else {
-        next();
-      }
-    } catch (error) {
-      console.log(error);
-      next(error);
+router.delete("/:userName/experience/:expId", async (req, res, next) => {
+  try {
+    const exp = await experienceModel.findOneAndDelete({
+      $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
+    });
+    if (exp) {
+      res.send(exp);
+    } else {
+      next();
     }
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
-);
-router.get("/profile/:userName/experiences/CSV", async (req, res, next) => {
+});
+router.get("/:userName/experience/CSV", async (req, res, next) => {
   try {
     // SOURCE (FILE ON DISK) --> TRANSFORM (.json into .csv) --> DESTINATION (HTTP Res)
     const exp = await experienceModel.find();
