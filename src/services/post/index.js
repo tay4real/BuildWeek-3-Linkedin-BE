@@ -111,11 +111,14 @@ router.post(
 
 router.get("/:username/allpost", async (req, res, next) => {
   try {
-    const { post } = await PostModel.findOne({
-      username: req.params.username,
-    });
+    const user = ProfileModel.find({ username: req.params.username });
 
-    res.send(post);
+    console.log(user);
+    // const { post } = await PostModel.find({ profiles: id }).populate(
+    //   "profiles"
+    // );
+
+    res.send(user);
   } catch (error) {
     console.log(error);
     next(error);
