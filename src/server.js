@@ -11,7 +11,7 @@ server.use(cors());
 server.use("/api", services);
 
 mongoose
-  .connect(process.env.MONGO_CONNECTION, {
+  .connect(process.env.MONGO_DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

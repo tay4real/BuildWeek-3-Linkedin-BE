@@ -1,18 +1,26 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const q2m = require("query-to-mongo");
 const experienceModel = require("./schema");
+
 const { createReadStream } = require("fs-extra");
 
 const { Transform } = require("json2csv");
 const { pipeline } = require("stream");
 const router = require("express").Router();
 
-router.get("experience/:userName", async (req, res, next) => {
+router.get("/:userName", async (req, res, next) => {
   try {
-    const exp = await experienceModel.findOne({
-      userName: req.params.userName,
-    });
-    res.send(exp);
+    const query = q2m(req.query);
+    const total = await experienceModel.countDocuments(query.criteria);
+    const experience = await experienceModel
+      .find({ profiles: req.params.userName } || query.criteria)
+      .sort(query.options.sort)
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+      .populate("profiles");
+
+    res.send({ links: query.links("/experiences", total), experience });
   } catch (error) {
     console.log(error);
     next(error);
@@ -21,22 +29,19 @@ router.get("experience/:userName", async (req, res, next) => {
 
 router.post("/:userName", async (req, res, next) => {
   try {
-    const newExp = new experienceModel(req.body);
+    const exp = req.body;
+    console.log(exp);
+    exp.profiles = req.params.userName;
+    const newExp = new experienceModel(exp);
 
-    const updated = await experienceModel.findOneAndUpdate(
-      { userName: req.params.userName },
-
-      newExp,
-
-      { runValidators: true, new: true }
-    );
-    res.status(201).send(updated);
+    const { _id } = await newExp.save();
+    res.status(201).send(_id);
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/:userName/experience/:expId", async (req, res, next) => {
+router.get("/profile/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const experience = await experienceModel.find({
       $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
@@ -48,7 +53,7 @@ router.get("/:userName/experience/:expId", async (req, res, next) => {
   }
 });
 
-router.put("/:userName/experience/:expId", async (req, res, next) => {
+router.put("/profile/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const modifiedExp = await experienceModel.findOneAndUpdate(
       {
@@ -70,22 +75,25 @@ router.put("/:userName/experience/:expId", async (req, res, next) => {
     next(error);
   }
 });
-router.delete("/:userName/experience/:expId", async (req, res, next) => {
-  try {
-    const exp = await experienceModel.findOneAndDelete({
-      $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
-    });
-    if (exp) {
-      res.send(exp);
-    } else {
-      next();
+router.delete(
+  "/profile/:userName/experiences/:expId",
+  async (req, res, next) => {
+    try {
+      const exp = await experienceModel.findOneAndDelete({
+        $and: [{ userName: req.params.userName }, { _id: req.params.expId }],
+      });
+      if (exp) {
+        res.send(exp);
+      } else {
+        next();
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
-router.get("/:userName/experience/CSV", async (req, res, next) => {
+);
+router.get("/profile/:userName/experiences/CSV", async (req, res, next) => {
   try {
     // SOURCE (FILE ON DISK) --> TRANSFORM (.json into .csv) --> DESTINATION (HTTP Res)
     const exp = await experienceModel.find();
