@@ -19,5 +19,5 @@ BE: (still to be implemented)
 #### 25/01/21: 
 Created Notion page for organization and divided tasks
 - Added CRUD and PDF creation for user
-###26/01/21: 
+### 26/01/21: 
 
