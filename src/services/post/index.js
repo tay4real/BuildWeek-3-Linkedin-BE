@@ -1,14 +1,29 @@
 router = require("express").Router();
 const mongoose = require("mongoose");
 const q2m = require("query-to-mongo");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 const PostModel = require("./schema");
+const ProfileModel = require("../profile/profileSchema");
+
+const cloudinary = require("../../lib/cloudinary");
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "linkedln/posts",
+  },
+});
+
+const cloudinaryMulter = multer({ storage: storage });
 
 router.get("/", async (req, res, next) => {
   try {
     const query = q2m(req.query);
     const total = await PostModel.countDocuments(query.criteria);
 
-    const posts = await PostModel.find(query.criteria, query.options.fields)
+    const posts = await PostModel.find(query.criteria)
       .sort(query.options.sort)
       .skip(query.options.skip)
       .limit(query.options.limit)
@@ -73,61 +88,36 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-router.get("/:id/comments", async (req, res, next) => {
-  try {
-    const { post } = await PostModel.findById(req.params.id, {
-      review: 1,
-      _id: 0,
-    });
-    res.send(review);
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-
-router.get("/:id/comments/:commentId", async (req, res, next) => {
-  try {
-    const { review } = await PostModel.findOne(
-      {
-        _id: mongoose.Types.ObjectId(req.params.id),
-      },
-      {
-        _id: 0,
-        review: {
-          $elemMatch: { _id: mongoose.Types.ObjectId(req.params.reviewId) },
+router.post(
+  "/:id/upload",
+  cloudinaryMulter.single("postimage"),
+  async (req, res, next) => {
+    try {
+      const updated = await PostModel.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            postimageUrl: req.file.path,
+          },
         },
-      }
-    );
-
-    if (review && review.length > 0) {
-      res.send(review);
-    } else {
-      next();
+        { runValidators: true, new: true }
+      );
+      res.status(201).send(updated);
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
+);
 
-router.post("/:id", async (req, res, next) => {
+router.get("/:username/allpost", async (req, res, next) => {
   try {
-    const post = await PostModel.findById(req.params.id, {
-      _id: 0,
+    const { post } = await PostModel.findOne({
+      username: req.params.username,
     });
 
-    const updated = await PostModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        $push: {
-          review: req.body.review,
-        },
-      },
-      { runValidators: true, new: true }
-    );
-    res.status(201).send(updated);
+    res.send(post);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 });
