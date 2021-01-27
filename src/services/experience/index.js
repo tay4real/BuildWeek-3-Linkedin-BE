@@ -16,7 +16,7 @@ router.get("/:userName", async (req, res, next) => {
 
     const id = await user[0]._id;
 
-    const experience = await experienceModel.findOne({ profiles: id });
+    const experience = await experienceModel.find({ profiles: id });
 
     res.send(experience);
   } catch (error) {
@@ -43,20 +43,12 @@ router.post("/:userName", async (req, res, next) => {
   }
 });
 
-router.get("/:userName/experiences/:expId", async (req, res, next) => {
+router.get("/experiences/:expId", async (req, res, next) => {
   try {
-    const user = await profileModel.findOne({ username: req.params.userName });
+    // const user = await profileModel.find({ username: req.params.userName });
 
-    const id = await user._id;
-    const exp = await experienceModel.findOne(
-      { _id: mongoose.Types.ObjectId(req.params.expId) }, // converts id as a string into id as an ObjectId
-      {
-        // projection
-        profiles: {
-          $elemMatch: { _id: mongoose.Types.ObjectId(id) }, // returns just the element of the array that matches this _id condition
-        },
-      }
-    );
+    // const id = await user[0]._id;
+    const exp = await experienceModel.findById(req.params.expId);
     console.log(exp);
     res.send(exp);
   } catch (error) {
@@ -102,11 +94,11 @@ router.delete("/:expId", async (req, res, next) => {
 router.get("/:userName/experiences/CSV", async (req, res, next) => {
   try {
     // SOURCE (FILE ON DISK) --> TRANSFORM (.json into .csv) --> DESTINATION (HTTP Res)
-    const user = await profileModel.findOne({ username: req.params.userName });
+    const user = await profileModel.find({ username: req.params.userName });
 
-    const id = await user._id;
+    const id = await user[0]._id;
 
-    const experience = await experienceModel.findOne({ profiles: id });
+    const experience = await experienceModel.find({ profiles: id });
 
     const source = createReadStream(experience);
 
