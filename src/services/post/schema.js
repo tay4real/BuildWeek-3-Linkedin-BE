@@ -8,7 +8,7 @@ const PostSchema = new Schema(
       required: true,
     },
     postimageUrl: String,
-    username: String,
+    username: { type: String, required: true },
     profiles: [{ type: Schema.Types.ObjectId, ref: "profile" }],
     comments: [
       {
