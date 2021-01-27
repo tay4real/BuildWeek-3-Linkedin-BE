@@ -12,7 +12,6 @@ const experienceSchema = new Schema(
     company: String,
     description: String,
     area: String,
-    image: String,
 
     image: String, //server generated on upload, set a default here
     profiles: [{ type: Schema.Types.ObjectId, ref: "Profile" }],

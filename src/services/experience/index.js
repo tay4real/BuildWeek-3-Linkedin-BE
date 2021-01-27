@@ -44,15 +44,16 @@ router.post(
       const user = await profileModel.find({ username: req.params.userName });
 
       const id = await user[0]._id;
-
-      const exp = req.body;
-      console.log(exp);
-      exp.profiles = [id];
-
-      const newExp = new experienceModel(exp);
-
-      const { _id } = await newExp.save();
-      res.status(201).send(_id);
+      const updated = await experienceModel.findOneAndUpdate(
+        { profiles: id },
+        {
+          $set: {
+            image: req.file.path,
+          },
+        },
+        { runValidators: true, new: true }
+      );
+      res.status(201).send(updated);
     } catch (error) {
       next(error);
     }
