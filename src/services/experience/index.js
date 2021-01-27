@@ -48,6 +48,8 @@ router.post(
         { profiles: id },
         {
           $set: {
+            // profiles: req.body.username,
+            // role: req.body.role,
             image: req.file.path,
           },
         },
