@@ -36,8 +36,23 @@ router.get("/:userName", async (req, res, next) => {
   }
 });
 
+router.post("/:userName", async (req, res, next) => {
+  try {
+    const user = await profileModel.find({ username: req.params.userName });
+
+    const id = await user[0]._id;
+
+    const newExp = new experienceModel(req.body);
+
+    const { _id } = await newExp.save();
+
+    res.status(201).send(_id);
+  } catch (error) {
+    next(error);
+  }
+});
 router.post(
-  "/:userName",
+  "/upload/:userName",
   cloudinaryMulter.single("image"),
   async (req, res, next) => {
     try {
@@ -53,7 +68,11 @@ router.post(
             image: req.file.path,
           },
         },
-        { runValidators: true, new: true }
+        {
+          runValidators: true,
+          returnOriginal: false,
+          useFindAndModify: false,
+        }
       );
       res.status(201).send(updated);
     } catch (error) {
@@ -61,7 +80,6 @@ router.post(
     }
   }
 );
-
 router.get("/experiences/:expId", async (req, res, next) => {
   try {
     // const user = await profileModel.find({ username: req.params.userName });
