@@ -112,68 +112,133 @@ router.post(
 router.get("/:username/allpost", async (req, res, next) => {
   try {
     const post = await PostModel.find({ username: req.params.username });
-    res.send(post);
+    if (post) {
+      res.send(post);
+    } else {
+      next();
+    }
   } catch (error) {
     next("While reading posts list a problem occurred!");
   }
 });
 
-router.put("/:id/comments/:commentId", async (req, res, next) => {
+router.post("/:id/comments", async (req, res, next) => {
   try {
-    const { review } = await PostModel.findOne(
+    const updated = await PostModel.findByIdAndUpdate(
+      req.params.id,
       {
-        _id: mongoose.Types.ObjectId(req.params.id),
+        $push: {
+          comments: [
+            {
+              text: req.body.text,
+              profiles: req.body.profileId,
+            },
+          ],
+        },
       },
-      {
-        _id: 0,
-        review: {
-          $elemMatch: { _id: mongoose.Types.ObjectId(req.params.reviewId) },
-        },
-      }
+      { runValidators: true, new: true }
     );
-
-    if (review && review.length > 0) {
-      const reviewToEdit = { ...review[0].toObject(), ...req.body };
-
-      const modifiedPost = await ArticleModel.findOneAndUpdate(
-        {
-          _id: mongoose.Types.ObjectId(req.params.id),
-          "review._id": mongoose.Types.ObjectId(req.params.reviewId),
-        },
-        { $set: { "review.$": reviewToEdit } },
-        {
-          runValidators: true,
-          new: true,
-        }
-      );
-      res.send(modifiedPost);
-    } else {
-      next();
-    }
+    res.status(201).send(updated);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 });
 
-router.delete("/:id/reviews/:reviewId", async (req, res, next) => {
+router.put("/:id/comments/:commentId", async (req, res, next) => {
   try {
-    const modifiedPost = await PostModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        $pull: {
-          review: {
-            _id: mongoose.Types.ObjectId(req.params.reviewId),
-          },
-        },
-      },
-      {
-        new: true,
+    const post = await PostModel.findById(req.params.id);
+
+    if (post) {
+      const comments = post.comments;
+      //console.log(comments);
+
+      if (comments) {
+        const newComments = comments.filter(
+          (comment) => comment._id.toString() !== req.params.commentId
+        );
+
+        const commentToUpdate = comments.find(
+          (comment) => comment._id.toString() === req.params.commentId
+        );
+
+        if (commentToUpdate) {
+          commentToUpdate.text = req.body.text;
+
+          newComments.push(commentToUpdate);
+
+          const updated = await PostModel.findOneAndUpdate(
+            {
+              _id: mongoose.Types.ObjectId(req.params.id),
+              "comments._id": mongoose.Types.ObjectId(req.params.commentId),
+            },
+            {
+              $set: {
+                comments: newComments,
+              },
+            },
+            { runValidators: true, new: true }
+          );
+
+          if (updated) {
+            res.send("Update successful!");
+          } else {
+            res.send("Update failed!");
+          }
+        } else {
+          res.send("Sorry, the requested comment does not exist");
+        }
+      } else {
+        res.send("No comments available for this post");
       }
-    );
-    res.send(modifiedPost);
+    } else {
+      res.send("Sorry, this post does not exist");
+    }
   } catch (error) {
-    console.log(error);
+    next(error);
+  }
+});
+
+router.delete("/:id/comments/:commentId", async (req, res, next) => {
+  try {
+    const post = await PostModel.findById(req.params.id);
+
+    if (post) {
+      const comments = post.comments;
+
+      if (comments) {
+        const newComments = comments.filter(
+          (comment) => comment._id.toString() !== req.params.commentId
+        );
+
+        if (newComments && newComments.length < comments.length) {
+          const updated = await PostModel.findOneAndUpdate(
+            {
+              _id: mongoose.Types.ObjectId(req.params.id),
+              "comments._id": mongoose.Types.ObjectId(req.params.commentId),
+            },
+            {
+              $set: {
+                comments: newComments,
+              },
+            },
+            { runValidators: true, new: true }
+          );
+
+          if (updated) {
+            res.send("Deleted successfully!");
+          } else {
+            res.send("Delete failed!");
+          }
+        } else {
+          res.send("Not found");
+        }
+      } else {
+        res.send("No comments available for this post");
+      }
+    } else {
+      res.send("Sorry, this post does not exist");
+    }
+  } catch (error) {
     next(error);
   }
 });
