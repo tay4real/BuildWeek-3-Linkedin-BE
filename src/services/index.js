@@ -16,11 +16,11 @@ router.use("/profile", profileRouter);
 router.use("/post", postRouter);
 router.use("/experience", expRouter);
 
-// // ERROR HANDLERS
-// router.use(notFoundHandler);
-// router.use(unauthorizedHandler);
-// router.use(forbiddenHandler);
-// router.use(badRequestHandler);
-// router.use(catchAllHandler);
+// ERROR HANDLERS
+router.use(notFoundHandler);
+router.use(unauthorizedHandler);
+router.use(forbiddenHandler);
+router.use(badRequestHandler);
+router.use(catchAllHandler);
 
 module.exports = router;
