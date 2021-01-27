@@ -1,14 +1,25 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const q2m = require("query-to-mongo");
+const Json2csvParser = require("json2csv").Parser;
+const fs = require("fs");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+const cloudinary = require("./cloudinary");
+
 const experienceModel = require("./schema");
 const profileModel = require("../profile/profileSchema");
 
-const { createReadStream } = require("fs-extra");
-
-const { Transform } = require("json2csv");
-const { pipeline } = require("stream");
 const router = require("express").Router();
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "linkedIn",
+  },
+});
+const cloudinaryMulter = multer({ storage: storage });
 
 router.get("/:userName", async (req, res, next) => {
   try {
@@ -31,18 +42,44 @@ router.post("/:userName", async (req, res, next) => {
 
     const id = await user[0]._id;
 
-    const exp = req.body;
-    exp.profiles = [id];
-
-    const newExp = new experienceModel(exp);
+    const newExp = new experienceModel(req.body);
 
     const { _id } = await newExp.save();
+
     res.status(201).send(_id);
   } catch (error) {
     next(error);
   }
 });
+router.post(
+  "/upload/:userName",
+  cloudinaryMulter.single("image"),
+  async (req, res, next) => {
+    try {
+      const user = await profileModel.find({ username: req.params.userName });
 
+      const id = await user[0]._id;
+      const updated = await experienceModel.findOneAndUpdate(
+        { profiles: id },
+        {
+          $set: {
+            // profiles: req.body.username,
+            // role: req.body.role,
+            image: req.file.path,
+          },
+        },
+        {
+          runValidators: true,
+          returnOriginal: false,
+          useFindAndModify: false,
+        }
+      );
+      res.status(201).send(updated);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 router.get("/experiences/:expId", async (req, res, next) => {
   try {
     // const user = await profileModel.find({ username: req.params.userName });
@@ -93,29 +130,24 @@ router.delete("/:expId", async (req, res, next) => {
 });
 router.get("/:userName/experiences/CSV", async (req, res, next) => {
   try {
-    // SOURCE (FILE ON DISK) --> TRANSFORM (.json into .csv) --> DESTINATION (HTTP Res)
     const user = await profileModel.find({ username: req.params.userName });
 
     const id = await user[0]._id;
 
     const experience = await experienceModel.find({ profiles: id });
 
-    const source = createReadStream(experience);
+    const fields = ["role", "company", "description", "startDate"];
+    const json2csvParser = new Json2csvParser({ fields });
+    const csvData = json2csvParser.parse(experience);
 
-    const transformJsonIntoCsv = new Transform({
-      fields: ["role", "company", "description", "startDate"],
+    fs.writeFile("experiences.csv", csvData, function (error) {
+      if (error) throw error;
+      console.log("CSV generated successfully!");
     });
-
-    res.setH4eader("Content-Disposition", "attachment; filename=whatever.csv"); // prompts out the "save on disk" window on browsers
-
-    pipeline(source, transformJsonIntoCsv, res, (err) => {
-      if (err) {
-        console.log(err);
-        next(err);
-      } else {
-        console.log("done");
-      }
-    });
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=experiences.csv"
+    ); // prompts out the "save on disk" window on browsers
   } catch (error) {
     console.log(error);
     next(error);
