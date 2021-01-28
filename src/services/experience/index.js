@@ -140,14 +140,15 @@ router.get("/:userName/experiences/CSV", async (req, res, next) => {
     const json2csvParser = new Json2csvParser({ fields });
     const csvData = json2csvParser.parse(experience);
 
-    fs.writeFile("experiences.csv", csvData, function (error) {
-      if (error) throw error;
-      console.log("CSV generated successfully!");
-    });
+    // fs.writeFile("experiences.csv", csvData, function (error) {
+    //   if (error) throw error;
+    //   console.log("CSV generated successfully!");
+    // });
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=experiences.csv"
-    ); // prompts out the "save on disk" window on browsers
+    );
+    res.send(csvData);
   } catch (error) {
     console.log(error);
     next(error);
