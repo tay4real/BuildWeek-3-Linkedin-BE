@@ -52,29 +52,20 @@ router.post("/:userName", async (req, res, next) => {
   }
 });
 router.post(
-  "/upload/:userName",
+  "/upload/:id",
   cloudinaryMulter.single("image"),
   async (req, res, next) => {
     try {
-      const user = await profileModel.find({ username: req.params.userName });
-
-      const id = await user[0]._id;
-      const updated = await experienceModel.findOneAndUpdate(
-        { profiles: id },
-        {
-          $set: {
-            // profiles: req.body.username,
-            // role: req.body.role,
-            image: req.file.path,
-          },
-        },
+      let img_path = await req.file.path
+      console.log("EXP IMAGE STORED IN : ", img_path)
+      await experienceModel.findByIdAndUpdate(req.params.id, {image: img_path},
         {
           runValidators: true,
           returnOriginal: false,
           useFindAndModify: false,
         }
-      );
-      res.status(201).send(updated);
+        )
+      res.send(img_path)
     } catch (error) {
       next(error);
     }
