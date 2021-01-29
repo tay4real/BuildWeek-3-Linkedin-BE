@@ -5,7 +5,7 @@ const experienceSchema = new Schema(
   {
     role: {
       type: String,
-      required: true,
+      required: "This is a mandatory field",
     },
     startDate: Date,
     endDate: Date,
