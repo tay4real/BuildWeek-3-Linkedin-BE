@@ -95,7 +95,7 @@ router.put("/:expId", async (req, res, next) => {
       }
     );
     if (modifiedExp) {
-      res.send(modifiedExp);
+      res.send(modifiedExp._id);
     } else {
       next();
     }

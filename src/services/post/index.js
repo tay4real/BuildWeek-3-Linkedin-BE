@@ -22,10 +22,9 @@ router.get("/", async (req, res, next) => {
   try {
     const query = q2m(req.query);
     const total = await PostModel.countDocuments(query.criteria);
-
-    const posts = await PostModel.find(query.criteria)
-      .sort(query.options.sort)
-      .skip(query.options.skip)
+    const posts = await PostModel.find()
+      //.sort(query.options.sort)
+      .skip(query.criteria.skip)
       .limit(query.options.limit)
       .populate("profiles");
     res.send({ links: query.links("/posts", total), posts });
