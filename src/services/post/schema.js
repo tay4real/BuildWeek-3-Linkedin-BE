@@ -16,6 +16,11 @@ const PostSchema = new Schema(
         profiles: [{ type: Schema.Types.ObjectId, ref: "profile" }],
       },
     ],
+    likes: [
+      {
+        profiles: [{ type: Schema.Types.ObjectId, ref: "profile" }],
+      },
+    ],
   },
   {
     timestamps: true,

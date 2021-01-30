@@ -242,4 +242,123 @@ router.delete("/:id/comments/:commentId", async (req, res, next) => {
   }
 });
 
+router.post("/:id/likes", async (req, res, next) => {
+  try {
+    const updated = await PostModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          likes: [
+            {
+              profiles: req.body.profileId,
+            },
+          ],
+        },
+      },
+      { runValidators: true, new: true }
+    );
+    res.status(201).send(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/:id/likes/:likeId", async (req, res, next) => {
+  try {
+    const post = await PostModel.findById(req.params.id);
+
+    if (post) {
+      const likes = post.likes;
+
+      if (likes) {
+        const newLIkes = likes.filter(
+          (like) => like._id.toString() !== req.params.likeId
+        );
+
+        const likeToUpdate = likes.find(
+          (like) => like._id.toString() === req.params.likeId
+        );
+
+        if (likeToUpdate) {
+          likeToUpdate.text = req.body.text;
+
+          newLIkes.push(likeToUpdate);
+
+          const updated = await PostModel.findOneAndUpdate(
+            {
+              _id: mongoose.Types.ObjectId(req.params.id),
+              "likes._id": mongoose.Types.ObjectId(req.params.likeId),
+            },
+            {
+              $set: {
+                likes: newLikes,
+              },
+            },
+            { runValidators: true, new: true }
+          );
+
+          if (updated) {
+            res.send("Update successful!");
+          } else {
+            res.send("Update failed!");
+          }
+        } else {
+          res.send("Sorry, the requested comment does not exist");
+        }
+      } else {
+        res.send("No comments available for this post");
+      }
+    } else {
+      res.send("Sorry, this post does not exist");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id/likes/:likeId", async (req, res, next) => {
+  try {
+    const post = await PostModel.findById(req.params.id);
+
+    if (post) {
+      const likes = post.likes;
+
+      if (likes) {
+        const newLikes = likes.filter(
+          (like) => like._id.toString() !== req.params.likeId
+        );
+
+        if (newLikes && newLikes.length < likes.length) {
+          const updated = await PostModel.findOneAndUpdate(
+            {
+              _id: mongoose.Types.ObjectId(req.params.id),
+              "likes._id": mongoose.Types.ObjectId(req.params.likeId),
+            },
+            {
+              $set: {
+                likes: newLikes,
+              },
+            },
+            { runValidators: true, new: true }
+          );
+
+          if (updated) {
+            res.send("Deleted successfully!");
+          } else {
+            res.send("Delete failed!");
+          }
+        } else {
+          res.send("Not found");
+        }
+      } else {
+        res.send("No comments available for this post");
+      }
+    } else {
+      res.send("Sorry, this post does not exist");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
